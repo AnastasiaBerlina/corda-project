@@ -36,6 +36,6 @@ public class GradeContract implements Contract {
     }
 
     // Used to indicate the transaction's intent.
-    public class GradeWork extends TypeOnlyCommandData {
+    public static class GradeWork extends TypeOnlyCommandData {
     }
 }
