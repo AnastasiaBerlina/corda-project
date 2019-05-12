@@ -5,6 +5,8 @@ import net.corda.core.contracts.BelongsToContract;
 import net.corda.core.contracts.ContractState;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
+import net.corda.core.serialization.ConstructorForDeserialization;
+import net.corda.core.serialization.CordaSerializable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.List;
 // * State *
 // *********
 @BelongsToContract(GradeContract.class)
+@CordaSerializable
 public class GradeState implements ContractState {
 
     private final Party lector;
@@ -20,6 +23,7 @@ public class GradeState implements ContractState {
     private final long grade;
     private final String subject;
 
+    @ConstructorForDeserialization
     public GradeState(Party lector, Party student, long grade, String subject) {
         this.lector = lector;
         this.student = student;

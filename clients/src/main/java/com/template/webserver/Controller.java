@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * Define your API endpoints here.
@@ -36,6 +37,13 @@ public class Controller {
         Party student = proxy.partiesFromName(studentName, false).iterator().next();
         SignedTransaction signedTransaction = proxy.startFlowDynamic(Initiator.class,
                 new GradeState(professor, student, grade, subjectName)).getReturnValue().get();
+        //
+        proxy.vaultQuery(GradeState.class).getStates()
+                .stream()
+                .map(gradeStateStateAndRef -> gradeStateStateAndRef.getState().getData())
+                .collect(Collectors.toList());
+
+        //
         return signedTransaction.getId().toString();
 
     }
