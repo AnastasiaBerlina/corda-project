@@ -26,7 +26,9 @@ public class GradeContract implements Contract {
             final GradeState output = (GradeState) tx.getOutputs().get(0).getData();
 
             require.using("Lector must not be null", output.getLector() != null);
+            require.using("Lector must be professor", output.getLector().getName().getOrganisation().startsWith("Prof"));
             require.using("Student must not be null", output.getStudent() != null);
+            require.using("Student must be student", output.getStudent().getName().getOrganisation().startsWith("Student"));
             require.using("Student must not be null", (output.getSubject() != null && !output.getSubject().equals("")));
             require.using(" Grade must be from 2 to 5", (output.getGrade() >= 2 && output.getGrade() <= 5));
 
