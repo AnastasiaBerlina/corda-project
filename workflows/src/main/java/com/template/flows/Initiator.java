@@ -37,7 +37,7 @@ public class Initiator extends FlowLogic<SignedTransaction> {
 
 
     private static final ProgressTracker.Step VERIFYING = new ProgressTracker.Step(
-            "Verifying seller assets");
+            "Verifying");
     private static final ProgressTracker.Step CREATING = new ProgressTracker.Step(
             "Generating and signing transaction proposal");
     private static final ProgressTracker.Step SUCCESS = new ProgressTracker.Step(
