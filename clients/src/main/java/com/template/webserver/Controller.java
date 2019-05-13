@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -28,23 +29,26 @@ public class Controller {
         this.proxy = rpc.proxy;
     }
 
-    @GetMapping(value = "/grade", produces = "text/plain")
-    private String templateendpoint(@RequestParam String lectorName,
+    @GetMapping(value = "gradeWork", produces = "text/plain")
+    private String templateendpoint(@RequestParam String lecturerName,
                                     @RequestParam String studentName,
-                                    @RequestParam String subjectName,
+                                    @RequestParam String subject,
                                     @RequestParam long grade) throws ExecutionException, InterruptedException {
-        Party professor = proxy.partiesFromName(lectorName, false).iterator().next();
+        Party lecturer = proxy.partiesFromName(lecturerName, false).iterator().next();
         Party student = proxy.partiesFromName(studentName, false).iterator().next();
         SignedTransaction signedTransaction = proxy.startFlowDynamic(Initiator.class,
-                new GradeState(professor, student, grade, subjectName)).getReturnValue().get();
-        //
-        proxy.vaultQuery(GradeState.class).getStates()
-                .stream()
-                .map(gradeStateStateAndRef -> gradeStateStateAndRef.getState().getData())
-                .collect(Collectors.toList());
-
-        //
+                new GradeState(lecturer, student, grade,subject)).getReturnValue().get();
         return signedTransaction.getId().toString();
 
+    }
+
+    @GetMapping("getGrades")
+    private String getGrades () {
+        List<GradeState> gradeStates = proxy.vaultQuery(GradeState.class).getStates()
+                .stream()
+                .map(gradeStateStateAndRef -> gradeStateStateAndRef.getState().getData())
+                //.filter(gradeState -> gradeState.getStudent().equals(proxy.nodeInfo().getLegalIdentities().get(0)))
+                .collect(Collectors.toList());
+        return gradeStates.toString();
     }
 }

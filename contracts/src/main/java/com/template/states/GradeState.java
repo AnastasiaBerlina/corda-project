@@ -18,21 +18,21 @@ import java.util.List;
 @CordaSerializable
 public class GradeState implements ContractState {
 
-    private final Party lector;
+    private final Party lecturer;
     private final Party student;
     private final long grade;
     private final String subject;
 
     @ConstructorForDeserialization
-    public GradeState(Party lector, Party student, long grade, String subject) {
-        this.lector = lector;
+    public GradeState(Party lecturer, Party student, long grade, String subject) {
+        this.lecturer = lecturer;
         this.student = student;
         this.grade = grade;
         this.subject = subject;
     }
 
-    public Party getLector() {
-        return lector;
+    public Party getLecturer() {
+        return lecturer;
     }
 
     public Party getStudent() {
@@ -49,6 +49,16 @@ public class GradeState implements ContractState {
 
     @Override
     public List<AbstractParty> getParticipants() {
-        return Arrays.asList(lector, student);
+        return Arrays.asList(lecturer, student);
+    }
+
+    @Override
+    public String toString() {
+        return "GradeState{" +
+                "lecturer=" + lecturer.getName().getOrganisation() +
+                ", student=" + student.getName().getOrganisation() +
+                ", grade=" + grade +
+                ", subject='" + subject + '\'' +
+                '}';
     }
 }

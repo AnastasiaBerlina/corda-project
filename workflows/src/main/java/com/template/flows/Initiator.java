@@ -17,6 +17,8 @@ import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,22 +30,17 @@ import java.util.stream.Collectors;
 @StartableByRPC
 public class Initiator extends FlowLogic<SignedTransaction> {
     private final ProgressTracker progressTracker = new ProgressTracker(
-            RECEIVING,
             VERIFYING,
-            SIGNING,
-            COLLECTING_SIGNATURES,
-            RECORDING
+            CREATING,
+            SUCCESS
     );
 
-    private static final ProgressTracker.Step RECEIVING = new ProgressTracker.Step(
-            "Waiting for seller trading info");
+
     private static final ProgressTracker.Step VERIFYING = new ProgressTracker.Step(
             "Verifying seller assets");
-    private static final ProgressTracker.Step SIGNING = new ProgressTracker.Step(
+    private static final ProgressTracker.Step CREATING = new ProgressTracker.Step(
             "Generating and signing transaction proposal");
-    private static final ProgressTracker.Step COLLECTING_SIGNATURES = new ProgressTracker.Step(
-            "Collecting signatures from other parties");
-    private static final ProgressTracker.Step RECORDING = new ProgressTracker.Step(
+    private static final ProgressTracker.Step SUCCESS = new ProgressTracker.Step(
             "Recording completed transaction");
 
     private final GradeState gradeState;
@@ -60,25 +57,27 @@ public class Initiator extends FlowLogic<SignedTransaction> {
     @Suspendable
     @Override
     public SignedTransaction call() throws FlowException {
+        if (!getOurIdentity().equals(gradeState.getLecturer()))
+            throw new IllegalArgumentException("Only specific professor can grade students");
         Party notary = getServiceHub().getNetworkParameters().getNotaries().get(0).getIdentity();
-        Set<FlowSession> otherFlowSessions = gradeState.getParticipants()
-                .stream()
-                .map(abstractParty -> initiateFlow((Party) abstractParty))
-                .collect(Collectors.toSet());
-        otherFlowSessions.add(initiateFlow(notary));
-        otherFlowSessions.remove(getOurIdentity());
+        Set<FlowSession> otherFlowSessions = new HashSet<>();
+        otherFlowSessions.add(initiateFlow(gradeState.getStudent()));
+        progressTracker.setCurrentStep(CREATING);
         List<PublicKey> publicKeys = gradeState.getParticipants()
                 .stream()
                 .map(AbstractParty::getOwningKey)
                 .collect(Collectors.toList());
-        publicKeys.add(notary.getOwningKey());
         TransactionBuilder transactionBuilder = new TransactionBuilder(notary)
-                .addCommand(new GradeContract.GradeWork(), publicKeys).addOutputState(gradeState);
+                .addCommand(new GradeContract.GradeWork(), publicKeys)
+                .addOutputState(gradeState);
 
         SignedTransaction signedTransaction = getServiceHub().signInitialTransaction(transactionBuilder);
 
+        progressTracker.setCurrentStep(VERIFYING);
         signedTransaction.getTx().toLedgerTransaction(getServiceHub()).verify();
-        SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(signedTransaction, otherFlowSessions, progressTracker));
+
+        SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(signedTransaction, otherFlowSessions));
+        progressTracker.setCurrentStep(SUCCESS);
         return subFlow(new FinalityFlow(fullySignedTx, otherFlowSessions));
     }
 }
