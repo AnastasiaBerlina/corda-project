@@ -26,3 +26,43 @@ go to http://localhost:10050, if you are a professor and want to grade students 
 /gradeWork?lecturerName=ProfB&studentName=StudentA&subject=spanish&grade=2 (for example),
 
 if you are student you can see your grades by going to "/getGrades".
+
+
+## Screenshots
+![Nodes deployed](/pictures/nodes.jpg)
+
+Nodes deployed
+
+![grade_student](/pictures/profAstudentA.jpg)
+
+Grading studentA by Prof A
+
+![grade_studentB](/pictures/profAstudentB.jpg)
+
+Grading student B by Prof A
+
+![what cause exception](/pictures/whatcauseException.jpg)
+
+if we try to grade students by another professor, we will get an exceptin
+
+![exception](/pictures/exception.jpg)
+
+than let's change parametres of launch to student A
+
+![studentA](/pictures/studentA.jpg)
+
+and go to /getGrades
+
+![getstudentA](/pictures/getGradesStudA.jpg)
+
+now let's change parametres of launch to student B
+
+![studentB](/pictures/studentB.jpg)
+
+and go to /getGrades
+
+![getstudentB](/pictures/getGradesStudentB.jpg)
+
+
+
+
